@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"http_healthchecker/internal/check"
@@ -24,8 +25,6 @@ func main() {
 		cancel()
 	}()
 
-	<-mainCtx.Done()
-
 	configPath := flag.String("config_path", "", "path to config file")
 	reqTimeoutSec := flag.Int("req_timeout_sec", 10, "http request timeout in seconds")
 	flag.Parse()
@@ -44,33 +43,37 @@ func main() {
 
 	checkMap := check.NewCheckerMap(&client)
 
-	for _, cfg := range config {
+	for _, urlCfg := range config {
 		failedChecks := []string{}
-		for _, check := range cfg.Checks {
-			checker, ok := checkMap[check.Name]
+		for _, urlCheck := range urlCfg.Checks {
+			checker, ok := checkMap[urlCheck.Name]
 			if !ok {
-				log.Printf("incorrect check %q type for url %q", check, cfg.URL)
+				log.Printf("incorrect check %q type for url %q\n", urlCheck, urlCfg.URL)
+				failedChecks = append(failedChecks, urlCheck.Name)
 				continue
 			}
 
-			err := checker.Check(mainCtx, cfg.URL, check.Params)
+			err := checker.Check(mainCtx, urlCfg.URL, urlCheck.Params)
 			if err != nil {
-				failedChecks = append(failedChecks, check.Name)
+				if !errors.Is(err, check.IncorrectStatusCode) {
+					log.Printf("check %q url %q error: %s\n", urlCheck.Name, urlCfg.URL, err)
+				}
+				failedChecks = append(failedChecks, urlCheck.Name)
 			}
 		}
 
-		successfulChecksCnt := len(cfg.Checks) - len(failedChecks)
+		successfulChecksCnt := len(urlCfg.Checks) - len(failedChecks)
 		var status string
-		if successfulChecksCnt >= cfg.MinChecksCnt {
+		if successfulChecksCnt >= urlCfg.MinChecksCnt {
 			status = "ok"
 		} else {
 			status = "fail"
 		}
 
 		if len(failedChecks) == 0 {
-			fmt.Printf("%s %s", cfg.URL, status)
+			fmt.Printf("%s %s\n", urlCfg.URL, status)
 			return
 		}
-		fmt.Printf("%s %s (%s)", cfg.URL, status, strings.Join(failedChecks, ", "))
+		fmt.Printf("%s %s (%s)\n", urlCfg.URL, status, strings.Join(failedChecks, ", "))
 	}
 }

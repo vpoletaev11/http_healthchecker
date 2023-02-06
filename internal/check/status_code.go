@@ -31,11 +31,13 @@ func (s *StatusCodeChecker) Check(ctx context.Context, url string, cfg map[strin
 	}
 
 	if resp.StatusCode != config.expectedStatusCode {
-		return fmt.Errorf("status code check fail, expected: %d, actual: %d", config.expectedStatusCode, resp.StatusCode)
+		return IncorrectStatusCode
 	}
 
 	return nil
 }
+
+var IncorrectStatusCode = fmt.Errorf("incorrect status code")
 
 type statusCodeCheckerCfg struct {
 	expectedStatusCode int
@@ -46,10 +48,11 @@ func NewStatusCodeCheckerCfg(cfg map[string]interface{}) (statusCodeCheckerCfg, 
 	if !ok {
 		return statusCodeCheckerCfg{}, fmt.Errorf("expected_status_code is undefined")
 	}
-	expectedStatusCode, ok := expectedStatusCodeInterface.(int)
+	expectedStatusCodeInt64, ok := (expectedStatusCodeInterface.(float64))
 	if !ok {
 		return statusCodeCheckerCfg{}, fmt.Errorf("incorrect type of expected_status_code, expected int")
 	}
+	expectedStatusCode := int(expectedStatusCodeInt64)
 
 	return statusCodeCheckerCfg{
 		expectedStatusCode: expectedStatusCode,
