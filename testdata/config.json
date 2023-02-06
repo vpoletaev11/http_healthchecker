@@ -2,17 +2,50 @@
     "urls": [
         {
             "url": "https://google.com",
-            "checks": ["status_code", "text"],
+            "checks": [
+                {
+                    "name": "status_code",
+                    "params": {
+                        "expected_status_code": 200
+                    }
+                },
+                {
+                    "name": "text",
+                    "params": {
+                        "expected_text": "ok"
+                    }
+                }
+            ],
             "min_checks_cnt": 2
         },
         {
             "url": "https://youtube.com",
-            "checks": ["status_code"],
+            "checks": [
+                {
+                    "name": "status_code",
+                    "params": {
+                        "expected_status_code": 200
+                    }
+                }
+            ],
             "min_checks_cnt": 1
         },
         {
             "url": "https://aws.amazon.com",
-            "checks": ["status_code", "text"],
+            "checks": [
+                {
+                    "name": "status_code",
+                    "params": {
+                        "expected_status_code": 200
+                    }
+                },
+                {
+                    "name": "text",
+                    "params": {
+                        "expected_text": "ok"
+                    }
+                }
+            ],
             "min_checks_cnt": 1
         }
     ]

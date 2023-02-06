@@ -8,8 +8,13 @@ import (
 
 type URLConfig struct {
 	URL          string
-	Checks       []string
+	Checks       []Check
 	MinChecksCnt int
+}
+
+type Check struct {
+	Name   string
+	Params map[string]interface{}
 }
 
 func GetConfigFromFile(path string) ([]URLConfig, error) {
@@ -37,15 +42,28 @@ type configJSON struct {
 }
 
 type urlConfigJSON struct {
-	URL          string   `json:"url"`
-	Checks       []string `json:"checks"`
-	MinChecksCnt int      `json:"min_check_cnt"`
+	URL          string      `json:"url"`
+	Checks       []checkJSON `json:"checks"`
+	MinChecksCnt int         `json:"min_checks_cnt"`
+}
+
+type checkJSON struct {
+	Name   string                 `json:"name"`
+	Params map[string]interface{} `json:"params"`
 }
 
 func (u urlConfigJSON) ToURLConfig() URLConfig {
+	checks := make([]Check, 0, len(u.Checks))
+	for _, c := range u.Checks {
+		checks = append(checks, Check{
+			Name:   c.Name,
+			Params: c.Params,
+		})
+	}
+
 	return URLConfig{
 		URL:          u.URL,
-		Checks:       u.Checks,
+		Checks:       checks,
 		MinChecksCnt: u.MinChecksCnt,
 	}
 }
