@@ -55,7 +55,7 @@ func main() {
 
 			err := checker.Check(mainCtx, urlCfg.URL, urlCheck.Params)
 			if err != nil {
-				if !errors.Is(err, check.IncorrectStatusCode) {
+				if !errors.Is(err, check.CheckFailed) {
 					log.Printf("check %q url %q error: %s\n", urlCheck.Name, urlCfg.URL, err)
 				}
 				failedChecks = append(failedChecks, urlCheck.Name)
@@ -72,8 +72,8 @@ func main() {
 
 		if len(failedChecks) == 0 {
 			fmt.Printf("%s %s\n", urlCfg.URL, status)
-			return
+		} else {
+			fmt.Printf("%s %s (%s)\n", urlCfg.URL, status, strings.Join(failedChecks, ", "))
 		}
-		fmt.Printf("%s %s (%s)\n", urlCfg.URL, status, strings.Join(failedChecks, ", "))
 	}
 }

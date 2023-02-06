@@ -10,19 +10,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func statusCode200Handler(w http.ResponseWriter, r *http.Request) {
-
+func textOKHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("ok"))
 }
 
-func TestStatusCodeCheckerSuccess(t *testing.T) {
+func TestSTextCheckerSuccess(t *testing.T) {
 	ctx := context.Background()
-	srv := httptest.NewServer(http.HandlerFunc(statusCode200Handler))
+	srv := httptest.NewServer(http.HandlerFunc(textOKHandler))
 	client := http.Client{}
 
-	checker := check.NewStatusCodeChecker(&client)
+	checker := check.NewTextChecker(&client)
 
 	err := checker.Check(ctx, srv.URL, map[string]interface{}{
-		"expected_status_code": float64(http.StatusOK),
+		"expected_text": "ok",
 	})
 	assert.NoError(t, err)
 }
