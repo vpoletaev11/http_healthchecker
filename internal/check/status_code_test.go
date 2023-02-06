@@ -14,7 +14,7 @@ func statusCode200Handler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func TestSatusCodeCheckerSuccess(t *testing.T) {
+func TestStatusCodeCheckerSuccess(t *testing.T) {
 	ctx := context.Background()
 	srv := httptest.NewServer(http.HandlerFunc(statusCode200Handler))
 	client := http.Client{}
